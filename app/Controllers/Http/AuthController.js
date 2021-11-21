@@ -8,7 +8,6 @@ class AuthController {
     try {
       const {token} = await auth.attempt(email, password, true)
       return response.send({token})
-      // return response.send({url: `http://localhost:3000/auth-sso?token=${token}`})
     } catch (error) {
       console.log('error', error)
       return response.status(404).send({ error: 'Usuário não encontrado' })
