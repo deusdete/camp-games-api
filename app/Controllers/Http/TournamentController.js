@@ -25,6 +25,18 @@ class TournamentController {
     }
   }
 
+  async show({ params, request, response }) {
+    const id = params.id
+    try {
+      const tournament = await Tournament.find(id)
+
+      return response.send(tournament)
+    } catch (error) {
+      console.log(error)
+      return response.status(400).send({ message: 'Erro ao buscar torneiros' })
+    }
+  }
+
   async store({ request, response }) {
     const {
       name,
