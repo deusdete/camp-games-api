@@ -4,6 +4,8 @@ const Banner = use('App/Models/Banner')
 const Helpers = use('Helpers')
 const Drive = use('Drive')
 
+const { v4: uuidv4} = require('uuid')
+const updadeFile = require('../../../Utils/UpdateFile')
 class BannerController {
   async index({ request, response }) {
     try {
@@ -17,25 +19,30 @@ class BannerController {
 
   async store({ auth, request, response }) {
     const { name, tournament_id } = request.all()
-
+    const image = request.file('image')
+    
     try {
       const user = await auth.getUser()
-     
-      let url_image = ''
-      let file_name = ''
-      
-      request.multipart.file('image', {}, async (file) => {
-        file_name = `${new Date().getTime()}.${file.clientName}`
-        url_image = await Drive.disk('s3').put(file_name, file.stream)
-      })
-    
-      await request.multipart.process()
+
+      let imageInfo = {
+        url: '',
+        filePath: '',
+      }
+  
+
+      if(image){
+        imageInfo = await updadeFile({
+          folder: 'banners',
+          subFolder: null,
+          file: image,
+        })
+      }
 
       const banner = new Banner()
 
       banner.name = name
-      banner.image_host = url_image
-      banner.image_name = file_name
+      banner.image_host = imageInfo.url
+      banner.image_name = imageInfo.filePath
       banner.tournament_id = tournament_id
       banner.user_id = user._id
 
@@ -54,12 +61,10 @@ class BannerController {
       const category = await Category.find(id)
 
       if (!category) {
-        return response
-          .status(404)
-          .send({ message: 'Banner não encontrada' })
+        return response.status(404).send({ message: 'Banner não encontrada' })
       }
 
-      await Drive.delete(`uploads/${category.image_name}`)
+      await Drive.delete(category.image_name)
 
       await category.delete()
 

@@ -4,6 +4,8 @@ const Category = use('App/Models/Category')
 const Helpers = use('Helpers')
 const Drive = use('Drive')
 
+const updadeFile = require('../../../Utils/UpdateFile')
+
 class CategoryController {
   async index({ request, response }) {
     try {
@@ -17,24 +19,29 @@ class CategoryController {
 
   async store({ request, response }) {
     const { name } = request.all()
-
+    const image = request.file('image')
     try {
 
-      let url_image = ''
-      let file_name = ''
+      let imageInfo = {
+        url: '',
+        filePath: '',
+      }
+  
 
-      request.multipart.file('image', {}, async (file) => {
-        file_name = `${new Date().getTime()}.${file.clientName}`
-        url_image = await Drive.disk('s3').put(file_name, file.stream)
-      })
-    
-      await request.multipart.process()
+      if(image){
+        imageInfo = await updadeFile({
+          folder: 'categories',
+          subFolder: null,
+          file: image,
+        })
+      }
+      
 
       const category = new Category()
 
       category.name = name
-      category.image_host = url_image
-      category.image_name = file_name
+      category.image_host = imageInfo.url
+      category.image_name = imageInfo.filePath
 
       await category.save()
       return response.send(category)

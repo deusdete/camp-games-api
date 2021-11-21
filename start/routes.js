@@ -51,5 +51,5 @@ Route.post('banner', 'BannerController.store').middleware('auth')
 Route.delete('banner', 'BannerController.destroy').middleware('auth')
 
 Route.resource('category', 'CategoryController')
-Route.resource('tournament', 'ToumamentController')
+Route.resource('tournament', 'TournamentController')
 Route.resource('ticket', 'TicketController').middleware('auth')
