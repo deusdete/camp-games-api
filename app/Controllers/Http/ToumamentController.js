@@ -48,7 +48,7 @@ class ToumamentController {
 
       const tourmament = new Tournament()
 
-      const file_host = process.env.NODE_ENV
+      const file_host = process.env.NODE_ENV === 'development'
         ? `http://localhost:3333/files/${fileName}`
         : `https://camp-games-api.herokuapp.com/files/${fileName}`
 
