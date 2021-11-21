@@ -35,6 +35,19 @@ Route.get('/files/:fileName', async ({params, response}) => {
     return 'File does not exist';
 })
 
+Route.delete('/files/:fileName', async ({params, response}) => {
+  const filePath = `uploads/${params.fileName}`;
+ 
+  const isExist = await Drive.exists(filePath);
+  if (isExist) {
+    await Drive.delete(filePath)
+
+    return response.send({message: `Arquivo ${params.fileName} apagado com sucesso.`})
+  }
+  return 'File does not exist';
+
+})
+
 Route.resource('category', 'CategoryController')
 Route.resource('tournament', 'ToumamentController')
 Route.resource('ticket', 'TicketController').middleware('auth')
