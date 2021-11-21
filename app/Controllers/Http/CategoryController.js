@@ -17,26 +17,24 @@ class CategoryController {
 
   async store({ request, response }) {
     const { name } = request.all()
-    const image = request.file('image')
-    try {
-      const fileName = `${new Date().getTime()}.${image.subtype}`
-      await image.move(Helpers.tmpPath('uploads'), {
-        name: fileName,
-      })
 
-      if (!image.moved()) {
-        return image.error()
-      }
+    try {
+
+      let url_image = ''
+      let file_name = ''
+
+      request.multipart.file('image', {}, async (file) => {
+        file_name = `${new Date().getTime()}.${image.subtype}`
+        url_image = await Drive.disk('s3').put(file_name, file.stream)
+      })
+    
+      await request.multipart.process()
 
       const category = new Category()
 
-      const file_host = process.env.NODE_ENV === 'development'
-        ? `http://localhost:3333/files/${fileName}`
-        : `https://camp-games-api.herokuapp.com/files/${fileName}`
-
       category.name = name
-      category.image_host = file_host
-      category.image_name = fileName
+      category.image_host = url_image
+      category.image_name = file_name
 
       await category.save()
       return response.send(category)

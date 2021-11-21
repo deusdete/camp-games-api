@@ -26,19 +26,17 @@ Route.post('/auth/login', 'AuthController.login')
 Route.post('/auth/register', 'AuthController.register')
 
 Route.get('/files/:fileName', async ({params, response}) => {
-    const filePath = `uploads/${params.fileName}`;
-    const isExist = await Drive.exists(filePath);
+    const isExist = await Drive.exists(params.fileName);
 
     if (isExist) {
-        return response.download(Helpers.tmpPath(filePath));
+        return response.download(Drive.getStream(params.fileName));
     }
     return 'File does not exist';
 })
 
 Route.delete('/files/:fileName', async ({params, response}) => {
-  const filePath = `uploads/${params.fileName}`;
  
-  const isExist = await Drive.exists(filePath);
+  const isExist = await Drive.exists(params.fileName);
   if (isExist) {
     await Drive.delete(filePath)
 

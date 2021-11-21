@@ -35,27 +35,24 @@ class ToumamentController {
       registration_fee,
       team,
     } = request.all()
-    const image = request.file('image')
-    try {
-      const fileName = `${new Date().getTime()}.${image.subtype}`
-      await image.move(Helpers.tmpPath('uploads'), {
-        name: fileName,
-      })
 
-      if (!image.moved()) {
-        return image.error()
-      }
+    try {
+      let url_image = ''
+      let file_name = ''
+
+      request.multipart.file('image', {}, async (file) => {
+        file_name = `${new Date().getTime()}.${image.subtype}`
+        url_image = await Drive.disk('s3').put(file_name, file.stream)
+      })
+    
+      await request.multipart.process()
 
       const tourmament = new Tournament()
 
-      const file_host = process.env.NODE_ENV === 'development'
-        ? `http://localhost:3333/files/${fileName}`
-        : `https://camp-games-api.herokuapp.com/files/${fileName}`
-
       tourmament.name = name
       tourmament.category_id = category_id
-      tourmament.image_host = file_host
-      tourmament.image_name = fileName
+      tourmament.image_host = url_image
+      tourmament.image_name = file_name
       tourmament.description = description
       tourmament.date_and_time = date_and_time
       tourmament.code_access = code_access

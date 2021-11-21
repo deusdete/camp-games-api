@@ -17,27 +17,25 @@ class BannerController {
 
   async store({ auth, request, response }) {
     const { name, tournament_id } = request.all()
-    const image = request.file('image')
+
     try {
       const user = await auth.getUser()
-      const fileName = `${new Date().getTime()}.${image.subtype}`
-      await image.move(Helpers.tmpPath('uploads'), {
-        name: fileName,
+     
+      let url_image = ''
+      let file_name = ''
+      
+      request.multipart.file('image', {}, async (file) => {
+        file_name = `${new Date().getTime()}.${image.subtype}`
+        url_image = await Drive.disk('s3').put(file_name, file.stream)
       })
-
-      if (!image.moved()) {
-        return image.error()
-      }
+    
+      await request.multipart.process()
 
       const banner = new Banner()
 
-      const file_host = process.env.NODE_ENV === 'development'
-        ? `http://localhost:3333/files/${fileName}`
-        : `https://camp-games-api.herokuapp.com/files/${fileName}`
-
       banner.name = name
-      banner.image_host = file_host
-      banner.image_name = fileName
+      banner.image_host = url_image
+      banner.image_name = file_name
       banner.tournament_id = tournament_id
       banner.user_id = user._id
 
