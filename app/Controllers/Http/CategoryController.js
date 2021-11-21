@@ -24,7 +24,7 @@ class CategoryController {
       let file_name = ''
 
       request.multipart.file('image', {}, async (file) => {
-        file_name = `${new Date().getTime()}.${image.subtype}`
+        file_name = `${new Date().getTime()}.${file.clientName}`
         url_image = await Drive.disk('s3').put(file_name, file.stream)
       })
     
