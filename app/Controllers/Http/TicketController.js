@@ -1,13 +1,20 @@
 'use strict'
 
 const Ticket = use('App/Models/Ticket');
+const Tournament = use('App/Models/Tournament');
 
 class TicketController {
     async index({auth, request, response}){
         try {
             const user = await auth.getUser()
             const tickets = await Ticket.query().where('user_id', '=', user._id).fetch()
-            return response.send(tickets)
+            const ticketsdata = tickets.toJSON()
+
+            const tournamentsIds = ticketsdata.map(item => {
+                return item.tournament_id
+            })
+            const tournaments = await Tournament.query().whereIn('_id', tournamentsIds).fetch()
+            return response.send({tickets, tournaments})
         } catch (error) {
             console.log(error)
             return response.status(400).send({message: 'Erro ao buscar ingressos'})
