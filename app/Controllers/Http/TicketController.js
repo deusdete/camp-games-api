@@ -6,8 +6,7 @@ const Tournament = use('App/Models/Tournament');
 class TicketController {
     async index({auth, request, response}){
         try {
-            const user = await auth.getUser()
-            const tickets = await Ticket.query().where('user_id', '=', user._id).fetch()
+            const tickets = await Ticket.all()
             const ticketsdata = tickets.toJSON()
 
             const tournamentsIds = ticketsdata.map(item => {
