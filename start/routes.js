@@ -52,4 +52,4 @@ Route.delete('banner', 'BannerController.destroy').middleware('auth')
 
 Route.resource('category', 'CategoryController')
 Route.resource('tournament', 'TournamentController')
-Route.resource('ticket', 'TicketController').middleware('auth')
+Route.resource('ticket', 'TicketController')
